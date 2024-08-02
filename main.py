@@ -3,9 +3,9 @@ import traceback
 import vertexai
 from vertexai.preview.vision_models import ImageGenerationModel
   
-# ŠÂ‹«•Ï”‚Ìİ’è
-PROJECT_ID = "tst-kpgs-poc-h2o"  # Google Cloud ƒvƒƒWƒFƒNƒg‚Ì ID
-LOCATION = "us-central1"  # Gemini ƒ‚ƒfƒ‹‚ğg—p‚·‚éƒŠ[ƒWƒ‡ƒ“
+# ç’°å¢ƒå¤‰æ•°ã®è¨­å®š
+PROJECT_ID = "tst-kpgs-poc-h2o"  # Google Cloud ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ãƒˆã® ID
+LOCATION = "us-central1"  # Gemini ãƒ¢ãƒ‡ãƒ«ã‚’ä½¿ç”¨ã™ã‚‹ãƒªãƒ¼ã‚¸ãƒ§ãƒ³
   
 vertexai.init(project=PROJECT_ID, location=LOCATION)
   
@@ -15,7 +15,7 @@ def imagen_generate(
     prompt: str,
     negative_prompt: str,
     sampleImageSize: int,
-    aspect_ratio: str, # ƒAƒXƒyƒNƒg”ä‚ğw’è‚Å‚«‚é‚æ‚¤‚É’Ç‰Á
+    aspect_ratio: str, # ã‚¢ã‚¹ãƒšã‚¯ãƒˆæ¯”ã‚’æŒ‡å®šã§ãã‚‹ã‚ˆã†ã«è¿½åŠ 
     sampleCount: int,
     seed=None,
 ):
@@ -25,8 +25,8 @@ def imagen_generate(
         negative_prompt=negative_prompt,
         number_of_images=sampleCount,
         guidance_scale=float(sampleImageSize),
-        aspect_ratio=aspect_ratio, # ƒAƒXƒyƒNƒg”ä‚ğw’è‚Å‚«‚é‚æ‚¤‚É’Ç‰Á
-        language="ja", # “ú–{Œê‚Å‚Ìƒvƒƒ“ƒvƒg‚É‘Î‰‚·‚é‚½‚ß‚É’Ç‰Á
+        aspect_ratio=aspect_ratio, # ã‚¢ã‚¹ãƒšã‚¯ãƒˆæ¯”ã‚’æŒ‡å®šã§ãã‚‹ã‚ˆã†ã«è¿½åŠ 
+        language="ja", # æ—¥æœ¬èªã§ã®ãƒ—ãƒ­ãƒ³ãƒ—ãƒˆã«å¯¾å¿œã™ã‚‹ãŸã‚ã«è¿½åŠ 
         seed=seed,
     )
     images = []
@@ -41,7 +41,7 @@ def update(
     prompt,
     negative_prompt,
     sampleImageSize="1536",
-    aspect_ratio="1:1", # ƒAƒXƒyƒNƒg”ä‚ğw’è‚Å‚«‚é‚æ‚¤‚É’Ç‰Á
+    aspect_ratio="1:1", # ã‚¢ã‚¹ãƒšã‚¯ãƒˆæ¯”ã‚’æŒ‡å®šã§ãã‚‹ã‚ˆã†ã«è¿½åŠ 
     sampleCount=4,
     seed=None,
 ):
@@ -61,7 +61,7 @@ def update(
     error_message = ""
     try:
         images, generate_response = imagen_generate(
-            model_name, prompt, negative_prompt, sampleImageSize, aspect_ratio, sampleCount, seed # ƒAƒXƒyƒNƒg”ä‚ğw’è‚Å‚«‚é‚æ‚¤‚É’Ç‰Á
+            model_name, prompt, negative_prompt, sampleImageSize, aspect_ratio, sampleCount, seed # ã‚¢ã‚¹ãƒšã‚¯ãƒˆæ¯”ã‚’æŒ‡å®šã§ãã‚‹ã‚ˆã†ã«è¿½åŠ 
         )
     except Exception as e:
         print(e)
@@ -74,47 +74,47 @@ def update(
   
     return images, error_message
   
-# gradio ‚Ìİ’è
+# gradio ã®è¨­å®š
 iface = gr.Interface(
     fn=update,
     inputs=[
         gr.Dropdown(
-            label="g—p‚·‚éƒ‚ƒfƒ‹",
-            choices=["imagegeneration@002", "imagegeneration@006"], # ÅVƒ‚ƒfƒ‹‚ğg—p‚·‚é—p‚ÉC³
-            value="imagegeneration@006", # ÅVƒ‚ƒfƒ‹‚ğg—p‚·‚é—p‚ÉC³
+            label="ä½¿ç”¨ã™ã‚‹ãƒ¢ãƒ‡ãƒ«",
+            choices=["imagegeneration@002", "imagegeneration@006"], # æœ€æ–°ãƒ¢ãƒ‡ãƒ«ã‚’ä½¿ç”¨ã™ã‚‹ç”¨ã«ä¿®æ­£
+            value="imagegeneration@006", # æœ€æ–°ãƒ¢ãƒ‡ãƒ«ã‚’ä½¿ç”¨ã™ã‚‹ç”¨ã«ä¿®æ­£
             ),
         gr.Textbox(
-            label="ƒvƒƒ“ƒvƒg“ü—Í", # “ú–{Œê‚Å‚Ì•\¦‚ÉC³
-            # “ú–{Œê‚Å‚Ìà–¾•¶Í‚ÉC³
-            placeholder="’Z‚¢•¶‚ÆƒL[ƒ[ƒh‚ğƒJƒ“ƒ}‚Å‹æØ‚Á‚Äg—p‚·‚éB‚½‚Æ‚¦‚Îu’‹ŠÔ, ã‹ó‚©‚ç‚ÌƒVƒ‡ƒbƒg, “®‚¢‚Ä‚¢‚é’¹v‚È‚Ç",
+            label="ãƒ—ãƒ­ãƒ³ãƒ—ãƒˆå…¥åŠ›", # æ—¥æœ¬èªã§ã®è¡¨ç¤ºã«ä¿®æ­£
+            # æ—¥æœ¬èªã§ã®èª¬æ˜æ–‡ç« ã«ä¿®æ­£
+            placeholder="çŸ­ã„æ–‡ã¨ã‚­ãƒ¼ãƒ¯ãƒ¼ãƒ‰ã‚’ã‚«ãƒ³ãƒã§åŒºåˆ‡ã£ã¦ä½¿ç”¨ã™ã‚‹ã€‚ãŸã¨ãˆã°ã€Œæ˜¼é–“, ä¸Šç©ºã‹ã‚‰ã®ã‚·ãƒ§ãƒƒãƒˆ, å‹•ã„ã¦ã„ã‚‹é³¥ã€ãªã©",
             value="",
             ),
         gr.Textbox(
-            label="ƒlƒKƒeƒBƒuƒvƒƒ“ƒvƒg", # “ú–{Œê‚Å‚Ì•\¦‚ÉC³
-            # “ú–{Œê‚Å‚Ìà–¾•¶Í‚ÉC³
-            placeholder="•\¦‚µ‚½‚­‚È‚¢“à—e‚ğ’è‹`‚µ‚Ü‚·",  
+            label="ãƒã‚¬ãƒ†ã‚£ãƒ–ãƒ—ãƒ­ãƒ³ãƒ—ãƒˆ", # æ—¥æœ¬èªã§ã®è¡¨ç¤ºã«ä¿®æ­£
+            # æ—¥æœ¬èªã§ã®èª¬æ˜æ–‡ç« ã«ä¿®æ­£
+            placeholder="è¡¨ç¤ºã—ãŸããªã„å†…å®¹ã‚’å®šç¾©ã—ã¾ã™",  
             value="",
             ),
         gr.Dropdown(
-            label="o—ÍƒCƒ[ƒWƒTƒCƒY", # “ú–{Œê‚Å‚Ì•\¦‚ÉC³
+            label="å‡ºåŠ›ã‚¤ãƒ¡ãƒ¼ã‚¸ã‚µã‚¤ã‚º", # æ—¥æœ¬èªã§ã®è¡¨ç¤ºã«ä¿®æ­£
             choices=["256", "1024", "1536"],
             value="1536",
             ),
         gr.Dropdown(
-            # ƒAƒXƒyƒNƒg”ä‚ğw’è‚Å‚«‚é‚æ‚¤‚É’Ç‰Á
-            label="ƒAƒXƒyƒNƒg”ä", # “ú–{Œê‚Å‚Ì•\¦‚ÉC³
+            # ã‚¢ã‚¹ãƒšã‚¯ãƒˆæ¯”ã‚’æŒ‡å®šã§ãã‚‹ã‚ˆã†ã«è¿½åŠ 
+            label="ã‚¢ã‚¹ãƒšã‚¯ãƒˆæ¯”", # æ—¥æœ¬èªã§ã®è¡¨ç¤ºã«ä¿®æ­£
             choices=["1:1", "9:16", "16:9","3:4", "4:3"],
             value="1:1",
             ),
         gr.Number(
-            label="•\¦Œ”",  # “ú–{Œê‚Å‚Ì•\¦‚ÉC³
-            # “ú–{Œê‚Å‚Ìà–¾•¶Í‚ÉC³
-            info="¶¬‚³‚ê‚é‰æ‘œ‚Ì”Bw’è‚Å‚«‚é®”’l: 1`4BƒfƒtƒHƒ‹ƒg’l: 4",
+            label="è¡¨ç¤ºä»¶æ•°",  # æ—¥æœ¬èªã§ã®è¡¨ç¤ºã«ä¿®æ­£
+            # æ—¥æœ¬èªã§ã®èª¬æ˜æ–‡ç« ã«ä¿®æ­£
+            info="ç”Ÿæˆã•ã‚Œã‚‹ç”»åƒã®æ•°ã€‚æŒ‡å®šã§ãã‚‹æ•´æ•°å€¤: 1ï½4ã€‚ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆå€¤: 4",
             value=4),
         gr.Number(
             label="seed",
-            # “ú–{Œê‚Å‚Ìà–¾•¶Í‚ÉC³
-            info="•K—v‚É‰‚¶‚ÄŒ‹‰Ê‚ğÄŒ»‚Å‚«‚é‚æ‚¤‚ÉA‰Â”\‚Å‚ ‚ê‚ÎƒV[ƒh‚ğg—p‚µ‚Ä‚­‚¾‚³‚¢B®””ÍˆÍ: (0, 2147483647)",
+            # æ—¥æœ¬èªã§ã®èª¬æ˜æ–‡ç« ã«ä¿®æ­£
+            info="å¿…è¦ã«å¿œã˜ã¦çµæœã‚’å†ç¾ã§ãã‚‹ã‚ˆã†ã«ã€å¯èƒ½ã§ã‚ã‚Œã°ã‚·ãƒ¼ãƒ‰ã‚’ä½¿ç”¨ã—ã¦ãã ã•ã„ã€‚æ•´æ•°ç¯„å›²: (0, 2147483647)",
             value=-1,
         ),
     ],
@@ -129,12 +129,12 @@ iface = gr.Interface(
         ),
         gr.Textbox(label="Error Messages"),
     ],
-    title="Image Generation with Imagen on Vertex AI", # ƒ^ƒCƒgƒ‹‚ÌC³
-    # “ú–{Œê‚Å‚Ìà–¾•¶Í‚ÉC³ 
-    description="""ƒeƒLƒXƒgƒvƒƒ“ƒvƒg‚©‚ç‚Ì‰æ‘œ¶¬BImagen ‚ÌƒhƒLƒ…ƒƒ“ƒg‚É‚Â‚¢‚Ä‚ÍA‚±‚Ì[ƒŠƒ“ƒN](https://cloud.google.com/vertex-ai/docs/generative-ai/image/generate-images)‚ğQÆ‚µ‚Ä‚­‚¾‚³‚¢B """,
+    title="Image Generation with Imagen on Vertex AI", # ã‚¿ã‚¤ãƒˆãƒ«ã®ä¿®æ­£
+    # æ—¥æœ¬èªã§ã®èª¬æ˜æ–‡ç« ã«ä¿®æ­£ 
+    description="""ãƒ†ã‚­ã‚¹ãƒˆãƒ—ãƒ­ãƒ³ãƒ—ãƒˆã‹ã‚‰ã®ç”»åƒç”Ÿæˆã€‚Imagen ã®ãƒ‰ã‚­ãƒ¥ãƒ¡ãƒ³ãƒˆã«ã¤ã„ã¦ã¯ã€ã“ã®[ãƒªãƒ³ã‚¯](https://cloud.google.com/vertex-ai/docs/generative-ai/image/generate-images)ã‚’å‚ç…§ã—ã¦ãã ã•ã„ã€‚ """,
     allow_flagging="never",
     theme=gr.themes.Soft(),
 )
   
-# Local ‹N“®
+# Local èµ·å‹•
 iface.launch()
