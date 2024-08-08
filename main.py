@@ -137,4 +137,4 @@ iface = gr.Interface(
 )
   
 # Local 起動
-iface.launch(server_port=8080)
+iface.launch(server_port=10080)
