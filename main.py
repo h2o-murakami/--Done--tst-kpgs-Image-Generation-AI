@@ -5,7 +5,7 @@ from vertexai.preview.vision_models import ImageGenerationModel
   
 # 環境変数の設定
 PROJECT_ID = "tst-kpgs-poc-h2o"  # Google Cloud プロジェクトの ID
-LOCATION = "us-central1"  # Gemini モデルを使用するリージョン
+LOCATION = "asia-northeast1"  # Gemini モデルを使用するリージョン
   
 vertexai.init(project=PROJECT_ID, location=LOCATION)
   
@@ -137,4 +137,4 @@ iface = gr.Interface(
 )
   
 # Local 起動
-iface.launch()
+iface.launch(server_port=8080)
