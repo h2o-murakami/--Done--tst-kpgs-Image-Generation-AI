@@ -4,38 +4,42 @@ import logging
 import gradio as gr
 import google.cloud.logging
 import vertexai
+from vertexai.generative_models import GenerativeModel, Content, Part
 from vertexai.language_models import ChatModel, ChatMessage, InputOutputTextPair
   
    
-# Cloud Logging ãƒãƒ³ãƒ‰ãƒ©ã‚’ logger ã«æ¥ç¶š
+# Cloud Logging ƒnƒ“ƒhƒ‰‚ğ logger ‚ÉÚ‘±
 logger = logging.getLogger()
 logging_client = google.cloud.logging.Client()
 logging_client.setup_logging()
   
-# å®šæ•°ã®å®šç¾©
+# ’è”‚Ì’è‹`
 PROJECT_ID = os.environ.get("PROJECT_ID")
 LOCATION = os.environ.get("LOCATION")
   
-# vertexai ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã®åˆæœŸåŒ–
+# vertexai ƒCƒ“ƒXƒ^ƒ“ƒX‚Ì‰Šú‰»
 vertexai.init(project=PROJECT_ID, location="us-central1")
   
   
 def llm_chat(message, chat_history):
-    # åŸºç›¤ãƒ¢ãƒ‡ãƒ«ã‚’è¨­å®š
-    chat_model = ChatModel.from_pretrained("chat-bison@001")
-  
-    # ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã‚’æŒ‡å®š
+    # ƒpƒ‰ƒ[ƒ^‚ğw’è
     parameters = {
         "max_output_tokens": 1024,
         "temperature": 0.2,
         "top_p": 0.8,
         "top_k": 40
     }
-  
-    # ä¼šè©±å±¥æ­´ã®ãƒªã‚¹ãƒˆã‚’åˆæœŸåŒ–
+
+    # Šî”Õƒ‚ƒfƒ‹‚ğİ’è
+    gemini_model = GenerativeModel(
+        model_name="gemini-1.5-pro",
+        generation_config=parameters
+    )
+
+    # ‰ï˜b—š—ğ‚ÌƒŠƒXƒg‚ğ‰Šú‰»
     message_history = []
   
-    # ä¼šè©±å±¥æ­´ã®ãƒ•ã‚©ãƒ¼ãƒãƒƒãƒˆã‚’æ•´å½¢
+    # ‰ï˜b—š—ğ‚ÌƒtƒH[ƒ}ƒbƒg‚ğ®Œ`
     for row in chat_history:
         input_from_user = row[0]
         output_from_llm = row[1]
@@ -46,20 +50,20 @@ def llm_chat(message, chat_history):
         a_message = ChatMessage(author="llm", content=output_from_llm)
         message_history.append(a_message)
   
-    # åŸºç›¤ãƒ¢ãƒ‡ãƒ«ã«ä¼šè©±å±¥æ­´ã‚’ã‚¤ãƒ³ãƒ—ãƒƒãƒˆ
-    chat = chat_model.start_chat(message_history=message_history)
+    # Šî”Õƒ‚ƒfƒ‹‚É‰ï˜b—š—ğ‚ğƒCƒ“ƒvƒbƒg
+    chat = gemini_model.start_chat(message_history=message_history)
   
-    # åŸºç›¤ãƒ¢ãƒ‡ãƒ«ã«ãƒ—ãƒ­ãƒ³ãƒ—ãƒˆãƒªã‚¯ã‚¨ã‚¹ãƒˆã‚’é€ä¿¡
-    response = chat.send_message(message, **parameters)
+    # Šî”Õƒ‚ƒfƒ‹‚Éƒvƒƒ“ƒvƒgƒŠƒNƒGƒXƒg‚ğ‘—M
+    response = chat.send_message(message).text
   
     return response.text
   
   
 def respond(message, chat_history):
-    # llm ã§å›ç­”ã‚’ç”Ÿæˆ
+    # llm ‚Å‰ñ“š‚ğ¶¬
     bot_message = llm_chat(message, chat_history)
   
-    # Cloud Logging æ›¸ãè¾¼ã¿ç”¨
+    # Cloud Logging ‘‚«‚İ—p
     logger.info(f"message: {message}")
     logger.info(f"chat_history: {chat_history}")
     logger.info(f"bot_message: {bot_message}")
@@ -67,7 +71,7 @@ def respond(message, chat_history):
     chat_history.append((message, bot_message))
     return "", chat_history
   
-# gradio ã®è¨­å®š
+# gradio ‚Ìİ’è
 with gr.Blocks() as llm_web_app:
     chatbot = gr.Chatbot()
     msg = gr.Textbox()
@@ -76,5 +80,5 @@ with gr.Blocks() as llm_web_app:
     msg.submit(respond, [msg, chatbot], [msg, chatbot])
     clear.click(lambda: None, None, chatbot, queue=False)
   
-# Gradio ã®ç«‹ã¡ä¸Šã’
+# Gradio ‚Ì—§‚¿ã‚°
 llm_web_app.launch(server_name="0.0.0.0", server_port=8080)
