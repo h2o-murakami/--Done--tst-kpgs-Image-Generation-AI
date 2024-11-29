@@ -1,11 +1,13 @@
 FROM python:3.12-slim
-  
-COPY ./app /app
-  
-WORKDIR /app
-  
+
+WORKDIR /usr/src/app
+
+COPY requirements.txt ./
+
 RUN pip install --no-cache-dir -r requirements.txt
-  
-EXPOSE 8080
-  
-CMD ["python", "app.py"]
+
+COPY . .
+
+EXPOSE 10080
+
+CMD [ "python", "./main.py" ] 

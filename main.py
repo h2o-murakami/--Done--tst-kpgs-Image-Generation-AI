@@ -1,140 +1,319 @@
+# •K—v‚Èƒ‰ƒCƒuƒ‰ƒŠ‚ÌƒCƒ“ƒ|[ƒg
+
 import gradio as gr
+
 import traceback
+
 import vertexai
+
 from vertexai.preview.vision_models import ImageGenerationModel
+
   
-# ç’°å¢ƒå¤‰æ•°ã®è¨­å®š
-PROJECT_ID = "tst-kpgs-poc-h2o"  # Google Cloud ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ãƒˆã® ID
-LOCATION = "us-central1"  # Gemini ãƒ¢ãƒ‡ãƒ«ã‚’ä½¿ç”¨ã™ã‚‹ãƒªãƒ¼ã‚¸ãƒ§ãƒ³
+
+# ŠÂ‹«•Ï”‚Ìİ’è
+
+PROJECT_ID = "tst-kpgs-poc-h2o"  # Google Cloud ƒvƒƒWƒFƒNƒg‚Ì ID
+
+LOCATION = "asia-northeast1"  # Gemini ƒ‚ƒfƒ‹‚ğg—p‚·‚éƒŠ[ƒWƒ‡ƒ“
+
   
+
+# Vertex AI ‚Ì‰Šú‰»
+
 vertexai.init(project=PROJECT_ID, location=LOCATION)
+
   
+
   
+
+# “ü—Í‚³‚ê‚½ƒvƒƒ“ƒvƒg‚ÉŠî‚Ã‚¢‚Ä‰æ‘œ‚ğ¶¬‚·‚éŠÖ”
+
 def imagen_generate(
+
     model_name: str,
+
     prompt: str,
+
     negative_prompt: str,
+
     sampleImageSize: int,
-    aspect_ratio: str, # ã‚¢ã‚¹ãƒšã‚¯ãƒˆæ¯”ã‚’æŒ‡å®šã§ãã‚‹ã‚ˆã†ã«è¿½åŠ 
+
+    aspect_ratio: str, # ƒAƒXƒyƒNƒg”ä‚ğw’è‚Å‚«‚é‚æ‚¤‚É’Ç‰Á
+
     sampleCount: int,
+
     seed=None,
+
 ):
+
+    # w’è‚³‚ê‚½–¼‘O‚ÌŠwKÏ‚İƒ‚ƒfƒ‹‚ğ“Ç‚İ‚Ş
+
     model = ImageGenerationModel.from_pretrained(model_name)
+
+    # “Ç‚İ‚ñ‚¾ƒ‚ƒfƒ‹‚ğg‚Á‚Ä‰æ‘œ‚ğ¶¬
+
     generate_response = model.generate_images(
+
         prompt=prompt,
+
         negative_prompt=negative_prompt,
+
         number_of_images=sampleCount,
+
         guidance_scale=float(sampleImageSize),
-        aspect_ratio=aspect_ratio, # ã‚¢ã‚¹ãƒšã‚¯ãƒˆæ¯”ã‚’æŒ‡å®šã§ãã‚‹ã‚ˆã†ã«è¿½åŠ 
-        language="ja", # æ—¥æœ¬èªã§ã®ãƒ—ãƒ­ãƒ³ãƒ—ãƒˆã«å¯¾å¿œã™ã‚‹ãŸã‚ã«è¿½åŠ 
+
+        aspect_ratio=aspect_ratio, # ƒAƒXƒyƒNƒg”ä‚ğw’è‚Å‚«‚é‚æ‚¤‚É’Ç‰Á
+
+        language="ja", # “ú–{Œê‚Å‚Ìƒvƒƒ“ƒvƒg‚É‘Î‰‚·‚é‚½‚ß‚É’Ç‰Á
+
         seed=seed,
+
     )
+
+    # ¶¬‚³‚ê‚½‰æ‘œ‚ğŠi”[‚·‚é‚½‚ß‚ÌƒŠƒXƒg‚ğì¬
+
     images = []
+
+    # ¶¬‚³‚ê‚½‰æ‘œ‚ğ‡”Ô‚Éˆ—
+
     for index, result in enumerate(generate_response):
+
+        # ¶¬‚³‚ê‚½‰æ‘œ‚ğƒŠƒXƒg‚É’Ç‰Á
+
         images.append(generate_response[index]._pil_image)
+
+    # ¶¬‚³‚ê‚½‰æ‘œ‚ÌƒŠƒXƒg‚ÆA¶¬ˆ—‚ÌƒŒƒXƒ|ƒ“ƒX‚ğ•Ô‹p
+
     return images, generate_response
+
   
+
   
-# Update function called by Gradio
+
+# Gradio ‚ÌƒCƒ“ƒ^[ƒtƒF[ƒX‚ªXV‚³‚ê‚½Û‚ÉŒÄ‚Ño‚³‚ê‚éŠÖ”
+
+# ˆø”‚ÍAGradio ‚ÌƒCƒ“ƒ^[ƒtƒF[ƒX‚©‚ç“ü—Í‚³‚ê‚½ƒf[ƒ^
+
 def update(
+
     model_name,
+
     prompt,
+
     negative_prompt,
+
     sampleImageSize="1536",
-    aspect_ratio="1:1", # ã‚¢ã‚¹ãƒšã‚¯ãƒˆæ¯”ã‚’æŒ‡å®šã§ãã‚‹ã‚ˆã†ã«è¿½åŠ 
+
+    aspect_ratio="1:1", # ƒAƒXƒyƒNƒg”ä‚ğw’è‚Å‚«‚é‚æ‚¤‚É’Ç‰Á
+
     sampleCount=4,
+
     seed=None,
+
 ):
+
+    # ƒlƒKƒeƒBƒuƒvƒƒ“ƒvƒg‚ª“ü—Í‚³‚ê‚Ä‚¢‚È‚¢ê‡‚ÍA`None` ‚ğİ’è
+
     if len(negative_prompt) == 0:
+
         negative_prompt = None
+
   
+
     print("prompt:", prompt)
+
     print("negative_prompt:", negative_prompt)
+
   
-    # Advanced option, try different the seed numbers
-    # any random integer number range: (0, 2147483647)
+
+    # ƒV[ƒh’l‚É–³Œø‚È’l‚ª“ü—Í‚³‚ê‚½ê‡‚ÍA`None` ‚ğİ’è
+
     if seed < 0 or seed > 2147483647:
+
         seed = None
+
   
-    # Use & provide a seed, if possible, so that we can reproduce the results when needed.
+
+    # ¶¬‚³‚ê‚½‰æ‘œ‚ğó‚¯æ‚é‚½‚ß‚ÌƒŠƒXƒg‚ğì¬
+
     images = []
+
+    # ƒGƒ‰[ƒƒbƒZ[ƒW‚ğó‚¯æ‚é‚½‚ß‚Ì•Ï”‚ğ’è‹`
+
     error_message = ""
+
     try:
+
+        # imagen_generateŠÖ”‚ğŒÄ‚Ño‚µ‚Ä‰æ‘œ‚ğ¶¬
+
         images, generate_response = imagen_generate(
-            model_name, prompt, negative_prompt, sampleImageSize, aspect_ratio, sampleCount, seed # ã‚¢ã‚¹ãƒšã‚¯ãƒˆæ¯”ã‚’æŒ‡å®šã§ãã‚‹ã‚ˆã†ã«è¿½åŠ 
+
+            model_name, prompt, negative_prompt, sampleImageSize, aspect_ratio, sampleCount, seed # ƒAƒXƒyƒNƒg”ä‚ğw’è‚Å‚«‚é‚æ‚¤‚É’Ç‰Á
+
         )
+
+    # ‰æ‘œ¶¬ˆ—‚É¸”s‚µ‚½ê‡‚Ì—áŠOˆ—
+
     except Exception as e:
+
         print(e)
+
+        # ƒGƒ‰[ƒƒbƒZ[ƒW‚ğİ’è
+
         error_message = """An error occured calling the API.
+
       1. Check if response was not blocked based on policy violation, check if the UI behaves the same way.
+
       2. Try a different prompt to see if that was the problem.
+
       """
+
         error_message += "\n" + traceback.format_exc()
-        # raise gr.Error(str(e))
-  
+
+
+
+    # ¶¬‚³‚ê‚½‰æ‘œ‚ÆƒGƒ‰[ƒƒbƒZ[ƒW‚ğ•Ô‹p  
+
     return images, error_message
+
   
-# gradio ã®è¨­å®š
+
+# Gradio ‚ÌƒCƒ“ƒ^[ƒtƒF[ƒXİ’è
+
 iface = gr.Interface(
+
+    # ƒCƒ“ƒ^[ƒtƒF[ƒX‚ªXV‚³‚ê‚½Û‚ÉŒÄ‚Ño‚³‚ê‚éŠÖ”‚ğw’è
+
     fn=update,
+
+    # ƒCƒ“ƒ^[ƒtƒF[ƒX‚Ö‚Ì“ü—Í—v‘f‚ğw’è
+
     inputs=[
+
         gr.Dropdown(
-            label="ä½¿ç”¨ã™ã‚‹ãƒ¢ãƒ‡ãƒ«",
-            choices=["imagegeneration@002", "imagegeneration@006"], # æœ€æ–°ãƒ¢ãƒ‡ãƒ«ã‚’ä½¿ç”¨ã™ã‚‹ç”¨ã«ä¿®æ­£
-            value="imagegeneration@006", # æœ€æ–°ãƒ¢ãƒ‡ãƒ«ã‚’ä½¿ç”¨ã™ã‚‹ç”¨ã«ä¿®æ­£
+
+            label="g—p‚·‚éƒ‚ƒfƒ‹",
+
+            choices=["imagegeneration@002", "imagegeneration@006"], # ÅVƒ‚ƒfƒ‹‚ğg—p‚·‚é—p‚ÉC³
+
+            value="imagegeneration@006", # ÅVƒ‚ƒfƒ‹‚ğg—p‚·‚é—p‚ÉC³
+
             ),
+
         gr.Textbox(
-            label="ãƒ—ãƒ­ãƒ³ãƒ—ãƒˆå…¥åŠ›", # æ—¥æœ¬èªã§ã®è¡¨ç¤ºã«ä¿®æ­£
-            # æ—¥æœ¬èªã§ã®èª¬æ˜æ–‡ç« ã«ä¿®æ­£
-            placeholder="çŸ­ã„æ–‡ã¨ã‚­ãƒ¼ãƒ¯ãƒ¼ãƒ‰ã‚’ã‚«ãƒ³ãƒã§åŒºåˆ‡ã£ã¦ä½¿ç”¨ã™ã‚‹ã€‚ãŸã¨ãˆã°ã€Œæ˜¼é–“, ä¸Šç©ºã‹ã‚‰ã®ã‚·ãƒ§ãƒƒãƒˆ, å‹•ã„ã¦ã„ã‚‹é³¥ã€ãªã©",
+
+            label="ƒvƒƒ“ƒvƒg“ü—Í", # “ú–{Œê‚Å‚Ì•\¦‚ÉC³
+
+            # “ú–{Œê‚Å‚Ìà–¾•¶Í‚ÉC³
+
+            placeholder="’Z‚¢•¶‚ÆƒL[ƒ[ƒh‚ğƒJƒ“ƒ}‚Å‹æØ‚Á‚Äg—p‚·‚éB‚½‚Æ‚¦‚Îu’‹ŠÔ, ã‹ó‚©‚ç‚ÌƒVƒ‡ƒbƒg, “®‚¢‚Ä‚¢‚é’¹v‚È‚Ç",
+
             value="",
+
             ),
+
         gr.Textbox(
-            label="ãƒã‚¬ãƒ†ã‚£ãƒ–ãƒ—ãƒ­ãƒ³ãƒ—ãƒˆ", # æ—¥æœ¬èªã§ã®è¡¨ç¤ºã«ä¿®æ­£
-            # æ—¥æœ¬èªã§ã®èª¬æ˜æ–‡ç« ã«ä¿®æ­£
-            placeholder="è¡¨ç¤ºã—ãŸããªã„å†…å®¹ã‚’å®šç¾©ã—ã¾ã™",  
+
+            label="ƒlƒKƒeƒBƒuƒvƒƒ“ƒvƒg", # “ú–{Œê‚Å‚Ì•\¦‚ÉC³
+
+            # “ú–{Œê‚Å‚Ìà–¾•¶Í‚ÉC³
+
+            placeholder="•\¦‚µ‚½‚­‚È‚¢“à—e‚ğ’è‹`‚µ‚Ü‚·",  
+
             value="",
+
             ),
+
         gr.Dropdown(
-            label="å‡ºåŠ›ã‚¤ãƒ¡ãƒ¼ã‚¸ã‚µã‚¤ã‚º", # æ—¥æœ¬èªã§ã®è¡¨ç¤ºã«ä¿®æ­£
+
+            label="o—ÍƒCƒ[ƒWƒTƒCƒY", # “ú–{Œê‚Å‚Ì•\¦‚ÉC³
+
             choices=["256", "1024", "1536"],
+
             value="1536",
+
             ),
+
         gr.Dropdown(
-            # ã‚¢ã‚¹ãƒšã‚¯ãƒˆæ¯”ã‚’æŒ‡å®šã§ãã‚‹ã‚ˆã†ã«è¿½åŠ 
-            label="ã‚¢ã‚¹ãƒšã‚¯ãƒˆæ¯”", # æ—¥æœ¬èªã§ã®è¡¨ç¤ºã«ä¿®æ­£
+
+            # ƒAƒXƒyƒNƒg”ä‚ğw’è‚Å‚«‚é‚æ‚¤‚É’Ç‰Á
+
+            label="ƒAƒXƒyƒNƒg”ä", # “ú–{Œê‚Å‚Ì•\¦‚ÉC³
+
             choices=["1:1", "9:16", "16:9","3:4", "4:3"],
+
             value="1:1",
+
             ),
+
         gr.Number(
-            label="è¡¨ç¤ºä»¶æ•°",  # æ—¥æœ¬èªã§ã®è¡¨ç¤ºã«ä¿®æ­£
-            # æ—¥æœ¬èªã§ã®èª¬æ˜æ–‡ç« ã«ä¿®æ­£
-            info="ç”Ÿæˆã•ã‚Œã‚‹ç”»åƒã®æ•°ã€‚æŒ‡å®šã§ãã‚‹æ•´æ•°å€¤: 1ï½4ã€‚ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆå€¤: 4",
+
+            label="•\¦Œ”",  # “ú–{Œê‚Å‚Ì•\¦‚ÉC³
+
+            # “ú–{Œê‚Å‚Ìà–¾•¶Í‚ÉC³
+
+            info="¶¬‚³‚ê‚é‰æ‘œ‚Ì”Bw’è‚Å‚«‚é®”’l: 1`4BƒfƒtƒHƒ‹ƒg’l: 4",
+
             value=4),
+
         gr.Number(
-            label="seed",
-            # æ—¥æœ¬èªã§ã®èª¬æ˜æ–‡ç« ã«ä¿®æ­£
-            info="å¿…è¦ã«å¿œã˜ã¦çµæœã‚’å†ç¾ã§ãã‚‹ã‚ˆã†ã«ã€å¯èƒ½ã§ã‚ã‚Œã°ã‚·ãƒ¼ãƒ‰ã‚’ä½¿ç”¨ã—ã¦ãã ã•ã„ã€‚æ•´æ•°ç¯„å›²: (0, 2147483647)",
+
+            label="ƒV[ƒh",
+
+            # “ú–{Œê‚Å‚Ìà–¾•¶Í‚ÉC³
+
+            info="•K—v‚É‰‚¶‚ÄŒ‹‰Ê‚ğÄŒ»‚Å‚«‚é‚æ‚¤‚ÉA‰Â”\‚Å‚ ‚ê‚ÎƒV[ƒh‚ğg—p‚µ‚Ä‚­‚¾‚³‚¢B®””ÍˆÍ: (0, 2147483647)",
+
             value=-1,
+
         ),
+
     ],
+
+    # ƒCƒ“ƒ^[ƒtƒF[ƒX‚Ìo—Í—v‘f‚ğw’è
+
     outputs=[
+
         gr.Gallery(
-            label="Generated Images",
+
+            label="¶¬‚³‚ê‚½‰æ‘œ",
+
             show_label=True,
+
             elem_id="gallery",
+
             columns=[2],
+
             object_fit="contain",
+
             height="auto",
+
         ),
-        gr.Textbox(label="Error Messages"),
+
+        gr.Textbox(label="ƒGƒ‰[ƒƒbƒZ[ƒW"),
+
     ],
-    title="Image Generation with Imagen on Vertex AI", # ã‚¿ã‚¤ãƒˆãƒ«ã®ä¿®æ­£
-    # æ—¥æœ¬èªã§ã®èª¬æ˜æ–‡ç« ã«ä¿®æ­£ 
-    description="""ãƒ†ã‚­ã‚¹ãƒˆãƒ—ãƒ­ãƒ³ãƒ—ãƒˆã‹ã‚‰ã®ç”»åƒç”Ÿæˆã€‚Imagen ã®ãƒ‰ã‚­ãƒ¥ãƒ¡ãƒ³ãƒˆã«ã¤ã„ã¦ã¯ã€ã“ã®[ãƒªãƒ³ã‚¯](https://cloud.google.com/vertex-ai/docs/generative-ai/image/generate-images)ã‚’å‚ç…§ã—ã¦ãã ã•ã„ã€‚ """,
+
+    # ƒCƒ“ƒ^[ƒtƒF[ƒX‚Ìƒ^ƒCƒgƒ‹‚ğİ’è
+
+    title="ƒLƒ“ƒvƒŠ•ŒÓ–ƒI AI Canvas",
+
+    # ƒCƒ“ƒ^[ƒtƒF[ƒX‚Ìà–¾•¶‚ğİ’è
+
+    description="""ƒeƒLƒXƒgƒvƒƒ“ƒvƒg‚©‚ç‚Ì‰æ‘œ¶¬BImagen ‚ÌƒhƒLƒ…ƒƒ“ƒg‚É‚Â‚¢‚Ä‚ÍA‚±‚Ì[ƒŠƒ“ƒN](https://cloud.google.com/vertex-ai/docs/generative-ai/image/generate-images)‚ğQÆ‚µ‚Ä‚­‚¾‚³‚¢B """,
+
+    # ƒtƒ‰ƒO‹@”\(ƒ†[ƒU[‚ÌƒtƒB[ƒhƒoƒbƒN‘—M‚Ì‹–‰Âİ’è)‚ğ–³Œø‚Éİ’è
+
     allow_flagging="never",
+
+    # ƒCƒ“ƒ^[ƒtƒF[ƒX‚Ìƒe[ƒ}‚ğİ’è
+
     theme=gr.themes.Soft(),
+
 )
+
   
-# Local èµ·å‹•
-iface.launch(server_port=10080)
+
+# Local ‹N“®
+
+iface.launch()
